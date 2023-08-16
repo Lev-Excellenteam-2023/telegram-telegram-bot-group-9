@@ -7,7 +7,6 @@ from flask import Flask, request, Response
 from dotenv import load_dotenv
 from database import save_report
 
-
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -38,9 +37,8 @@ def sanity_check():
 def handle_message():
     data = request.json
     chat_id = data['message']['chat']['id']
-    #message_text = data['message']['text']
-    #logger.debug("Received a message from Telegram: %s", message_text)
-
+    # message_text = data['message']['text']
+    # logger.debug("Received a message from Telegram: %s", message_text)
 
     if 'text' in data['message']:
         message_text = data['message']['text']
@@ -81,6 +79,7 @@ def send_response(chat_id, response_text):
     }
     response = requests.post(api_url, json=payload)
     logger.debug("Response sent: %s", response.json())
+
 
 def send_response_with_keyboard(chat_id, response_text, keyboard_options):
     api_url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
