@@ -1,14 +1,27 @@
 from datetime import datetime
+import logging
+from dotenv import load_dotenv
 import os
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 from response_parser import Report
-from consts import DATABASE_URL, DATABASE_CRED_PATH
 
-cred = credentials.Certificate(DATABASE_CRED_PATH)
+load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+database_url = os.getenv("DATABASE_URL")
+database_cred_path = os.getenv("DATABASE_CRED_PATH")
+
+logger.debug("database URL: %s", database_url)
+logger.debug("database URL: %s", database_cred_path)
+
+cred = credentials.Certificate(database_cred_path)
 default_app = firebase_admin.initialize_app(cred, {
-    'databaseURL': DATABASE_URL
+    'databaseURL': database_url
 })
 
 # Reference reports to the root of your database
@@ -19,8 +32,7 @@ def save_report(report: Report):
     new_data_ref = reports_ref.push({
         'id': report.user_id,
         'realtime': report.is_realtime,
+        'timestamp_of_reporting': report.timestamp,
         'location': report.location,
         'description': report.description
     })
-
-

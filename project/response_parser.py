@@ -7,7 +7,7 @@ class Report:
     """Class for saving report info."""
     user_id: str
     is_realtime: bool
-    timestamp: datetime
+    timestamp: str
     location: (float, float)
     description: str
 
@@ -15,6 +15,6 @@ class Report:
                  description: str):
         self.user_id = user_id
         self.is_realtime = is_realtime
-        self.timestamp = timestamp
+        self.timestamp = timestamp.isoformat()
         self.location = location
         self.description = description
