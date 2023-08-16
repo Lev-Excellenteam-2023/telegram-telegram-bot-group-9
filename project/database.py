@@ -1,17 +1,26 @@
+from datetime import datetime
 import os
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
+from response_parser import Report
+from consts import DATABASE_URL, DATABASE_CRED_PATH
 
-# Initialize Firebase
-firebase_cred = credentials.Certificate("path/to/your/firebase-credentials.json")
-firebase_admin.initialize_app(firebase_cred, {"databaseURL": "your-firebase-database-url"})
-firebase_ref = db.reference("/messages")  # Reference to Firebase database
+cred = credentials.Certificate(DATABASE_CRED_PATH)
+default_app = firebase_admin.initialize_app(cred, {
+    'databaseURL': DATABASE_URL
+})
 
-# Save user message to the database
-def save_user_message(user_id, message):
-    firebase_ref.child(user_id).push({"user": message})
+# Reference reports to the root of your database
+reports_ref = db.reference("/reports")  # Reference to Firebase database
 
-# Save bot response to the database
-def save_bot_response(user_id, response):
-    firebase_ref.child(user_id).push({"bot": response})
+
+def save_report(report: Report):
+    new_data_ref = reports_ref.push({
+        'id': report.user_id,
+        'realtime': report.is_realtime,
+        'location': report.location,
+        'description': report.description
+    })
+
+
