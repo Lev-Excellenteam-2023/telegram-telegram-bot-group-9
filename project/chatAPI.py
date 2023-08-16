@@ -1,16 +1,9 @@
+import os
+
 import openai
 
 
-# Generate a response using ChatGPT
-def generate_response(input_text: str) -> str:
-    return main()
-
-
-# Set your OpenAI API key
-api_key_file = 'api_key_file.txt'  # Replace with the path to your API key file
-
-with open(api_key_file, 'r') as file:
-    openai.api_key = file.read().strip()
+openai.api_key = os.getenv("API_CHATGPT_KEY")
 
 conversation_history = []
 conversation_history.append({"role": "assistant",
