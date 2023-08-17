@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 # Initialize Telegram Bot API
 telegram_token = os.getenv("TELEGRAM_TOKEN")
 webhook_url = os.getenv("WEBHOOK_URL")
-#requests.get(webhook_url)
 
 logger.debug("Telegram Token: %s", telegram_token)
 logger.debug("Webhook URL: %s", webhook_url)
@@ -30,6 +29,8 @@ def sanity_check():
 
 # Create a dictionary to store user states
 user_states = {}
+user_explain = {}
+user_location = {}
 
 
 # Create a /message route to handle incoming messages
@@ -45,8 +46,8 @@ def handle_message():
     if chat_id not in user_states:
         # # Create a Report instance for saving the information
         # report = Report(user_id=chat_id)
-        #print("report.user_id =", report.user_id)
-        #print("report.description =", report.description)
+        # print("report.user_id =", report.user_id)
+        # print("report.description =", report.description)
         user_states[chat_id] = "start"
 
     if 'text' in data['message']:
@@ -71,29 +72,46 @@ def handle_message():
             else:
                 response_text = "in status report, try again."
                 send_response(chat_id, response_text)
-        else:
-            response_text = "restarting the chat, press /start for a new report"
+
+        elif user_states[chat_id] == "explaination":
+            # sending to function that comunicates with the GPT
+            user_explain[chat_id] = "no idea"
+            report = Report(user_id=chat_id, is_realtime=True, timestamp=datetime.datetime.now(),
+                            location=user_location[chat_id], description=user_explain[chat_id])
+            # Remove chat_id from user_states dictionary
+            del user_states[chat_id]
+            save_report(report)
+            response_text = "Explaination received and saved. Thank you for being a valuable member. for a new report please press /report! "
             user_states[chat_id] = "report"
             send_response(chat_id, response_text)
+
+        else:
+            response_text = "restarting the chat, press /report for a new report"
+            user_states[chat_id] = "report"
+            send_response(chat_id, response_text)
+    # requests.get(webhook_url)
 
     elif 'location' in data['message']:
         if user_states[chat_id] == "added location":
             location = data['message']['location']
             latitude = location['latitude']
             longitude = location['longitude']
-                #loc = (latitude, longitude)
-                # report.set_location(loc)
-                # print("report.location =", report.location)
-            report = Report(user_id=chat_id, is_realtime=True, timestamp=datetime.datetime.now(),
-                                location=(latitude, longitude), description="somethinggggg")
-            user_states[chat_id] = "saving  report"
-            save_report(report)
+            # loc = (latitude, longitude)
+            # report.set_location(loc)
+            # print("report.location =", report.location)
 
-            response_text = "Location received and saved. Thank you!"
+            # report = Report(user_id=chat_id, is_realtime=True, timestamp=datetime.datetime.now(),
+            # location=(latitude, longitude), description="somethinggggg")
+            user_states[chat_id] = "explaination"
+            user_location[chat_id] = (latitude, longitude)
+            # save_report(report)
+
+            response_text = "Location received and saved. now please provide some explaination: "
             send_response(chat_id, response_text)
         else:
             response_text = "in status added location, try again."
             send_response(chat_id, response_text)
+
     else:
         response_text = "Got it."
         send_response(chat_id, response_text)
@@ -142,6 +160,6 @@ def send_response(chat_id, response_text):
 
 if __name__ == "__main__":
     # Set up the webhook here
-    requests.get(webhook_url)
+    # requests.get(webhook_url)
     # Start the bot
     app.run()
