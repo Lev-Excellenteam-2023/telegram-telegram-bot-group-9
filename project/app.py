@@ -104,11 +104,11 @@ def state_answer(message_text, chat_id):
                     location=current_users[chat_id].location,
                     description=current_users[chat_id].explanation)
 
-    # del current_users[chat_id]
+    del current_users[chat_id]
     save_report(report)
     response_text = "Report was received and saved.\n" \
                     "For a new report please enter /report! "
-    current_users[chat_id].state = State.REPORT
+    # current_users[chat_id].state = State.REPORT
     send_response(chat_id, response_text)
 
 
@@ -140,7 +140,7 @@ def handle_message():
         elif current_users[chat_id].state == State.ANSWER:
             state_answer(message_text, chat_id)
         else:
-            response_text = "restarting the chat, enter /report for a new report"
+            response_text = "restarting the chat, enter /start for a new report"
             current_users[chat_id].state = State.REPORT
             send_response(chat_id, response_text)
 
