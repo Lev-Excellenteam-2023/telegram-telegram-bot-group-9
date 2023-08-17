@@ -106,8 +106,9 @@ def state_answer(message_text, chat_id):
 
     del current_users[chat_id]
     save_report(report)
-    response_text = "Report was received and saved.\n" \
-                    "For a new report please enter /report! "
+    response_text = "Report was received and saved. " \
+                    "Thank you for your contribution in preventing agricultural crimes. " \
+                    "For a new report please enter /start! "
     # current_users[chat_id].state = State.REPORT
     send_response(chat_id, response_text)
 
