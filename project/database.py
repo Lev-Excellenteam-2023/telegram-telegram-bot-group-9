@@ -1,13 +1,11 @@
 from datetime import datetime
 import logging
-from dotenv import load_dotenv
 import os
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 from response_parser import Report
 
-load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -36,3 +34,7 @@ def save_report(report: Report):
         'location': report.location,
         'description': report.description
     })
+
+
+
+
