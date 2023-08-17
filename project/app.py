@@ -5,6 +5,7 @@ from response_parser import Report
 import requests
 from flask import Flask, request, Response
 from database import save_report
+from chatAPI import events_description, send_question, received_answer, summary_event_description,get_conversation_history
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -31,7 +32,7 @@ def sanity_check():
 user_states = {}
 user_explain = {}
 user_location = {}
-
+conversation_history=get_conversation_history()
 
 # Create a /message route to handle incoming messages
 @app.route('/message', methods=["POST"])
@@ -75,7 +76,16 @@ def handle_message():
 
         elif user_states[chat_id] == "explaination":
             # sending to function that comunicates with the GPT
-            user_explain[chat_id] = "no idea"
+            events_description(conversation_history,message_text)
+            question = send_question(conversation_history)
+            response_text = question
+            user_states[chat_id] = "answer1"
+            send_response(chat_id, response_text)
+
+        elif user_states[chat_id] == "answer1":
+            received_answer(conversation_history,message_text)
+            user_explain[chat_id] = summary_event_description(conversation_history)
+            print("user_explain[chat_id]",user_explain[chat_id])
             report = Report(user_id=chat_id, is_realtime=True, timestamp=datetime.datetime.now(),
                             location=user_location[chat_id], description=user_explain[chat_id])
             # Remove chat_id from user_states dictionary
@@ -84,6 +94,7 @@ def handle_message():
             response_text = "Explaination received and saved. Thank you for being a valuable member. for a new report please press /report! "
             user_states[chat_id] = "report"
             send_response(chat_id, response_text)
+
 
         else:
             response_text = "restarting the chat, press /report for a new report"
